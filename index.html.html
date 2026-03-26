@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Royal Shilton Resort — Revenue Dashboard 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --surface: #12151a;
+    --surface2: #181c23;
+    --border: #232830;
+    --gold: #c9a84c;
+    --gold2: #e4c677;
+    --gold-dim: rgba(201,168,76,0.12);
+    --gold-glow: rgba(201,168,76,0.25);
+    --text: #f0eae0;
+    --text-muted: #7a8090;
+    --text-dim: #4a5060;
+    --red: #e05c5c;
+    --green: #5cb88a;
+    --blue: #5b8de0;
+    --purple: #9b73d4;
+    --teal: #5bbab4;
+    --amber: #d4963a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page-wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 56px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left {}
+  .brand-eyebrow {
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .brand-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 42px;
+    line-height: 1;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .brand-title em {
+    font-style: italic;
+    color: var(--gold2);
+  }
+  .header-right {
+    text-align: right;
+  }
+  .report-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .report-period {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .report-sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* ─── SECTION LABEL ─── */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── KPI CARDS ─── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 24px 24px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+    animation: fadeUp 0.6s ease both;
+  }
+  .kpi-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .kpi-card:hover::before { opacity: 1; }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.1s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.2s; }
+
+  .kpi-label {
+    font-size: 9.5px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .kpi-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+  .kpi-value .currency {
+    font-size: 20px;
+    color: var(--gold);
+    margin-right: 2px;
+  }
+  .kpi-meta {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 10px;
+  }
+  .kpi-meta .highlight { color: var(--gold2); }
+  .kpi-badge {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 1px;
+    margin-top: 12px;
+  }
+  .badge-gold { background: var(--gold-dim); color: var(--gold2); border: 1px solid rgba(201,168,76,0.3); }
+  .badge-red { background: rgba(224,92,92,0.1); color: #e08080; border: 1px solid rgba(224,92,92,0.25); }
+  .badge-green { background: rgba(92,184,138,0.1); color: #7cd4a8; border: 1px solid rgba(92,184,138,0.25); }
+
+  /* ─── MAIN CHARTS ROW ─── */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 28px 28px 24px;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+  .chart-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    letter-spacing: 0.5px;
+  }
+  .chart-canvas-wrap {
+    position: relative;
+  }
+
+  /* ─── MONTHLY BREAKDOWN TABLE ─── */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 28px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.7s ease 0.3s both;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: right;
+    padding: 0 16px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  thead th:first-child { text-align: left; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(35,40,48,0.6);
+    transition: background 0.2s;
+  }
+  tbody tr:hover { background: rgba(201,168,76,0.04); }
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody td {
+    padding: 16px 16px;
+    font-size: 13px;
+    text-align: right;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  tbody td:first-child { text-align: left; }
+
+  .td-month {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .td-month small {
+    display: block;
+    font-family: 'Jost', sans-serif;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+  .td-gross { color: var(--text); font-weight: 400; }
+  .td-fee { color: var(--red); }
+  .td-vat { color: #d4963a; }
+  .td-net { color: var(--green); font-weight: 500; }
+
+  tfoot td {
+    padding: 18px 16px;
+    font-size: 12px;
+    text-align: right;
+    border-top: 1px solid var(--gold);
+    white-space: nowrap;
+  }
+  tfoot td:first-child { text-align: left; }
+  .tfoot-label {
+    font-size: 9.5px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-family: 'Jost', sans-serif;
+  }
+  .tfoot-gross { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--text); }
+  .tfoot-fee { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--red); }
+  .tfoot-vat { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--amber); }
+  .tfoot-net { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--green); }
+
+  /* ─── BOTTOM ROW ─── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  /* ─── OTA TABLE ─── */
+  .ota-list {
+    list-style: none;
+  }
+  .ota-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ota-item:last-child { border-bottom: none; }
+  .ota-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .ota-name {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .ota-count {
+    font-size: 10px;
+    color: var(--text-dim);
+    min-width: 52px;
+    text-align: right;
+  }
+  .ota-bar-wrap {
+    width: 80px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .ota-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .ota-amount {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text);
+    min-width: 70px;
+    text-align: right;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+  .footer-brand em { font-style: italic; color: var(--gold); }
+  .footer-note {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+  .footer-generated {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: right;
+  }
+
+  /* ─── TAB SELECTOR ─── */
+  .tab-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+  }
+  .tab-btn {
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 1px;
+  }
+  .tab-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .tab-btn.active {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+    color: var(--gold2);
+  }
+
+  /* ─── BOOKING TABLE ─── */
+  .booking-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .booking-table thead th {
+    font-size: 9px;
+    letter-spacing: 2px;
+    padding-bottom: 12px;
+    font-weight: 400;
+  }
+  .booking-table tbody td {
+    padding: 10px 16px;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(35,40,48,0.5);
+  }
+  .booking-table tbody tr:hover { background: rgba(201,168,76,0.03); }
+  .ota-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    border-radius: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── DECORATIVE ─── */
+  .gold-line {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 40px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .bottom-row { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 700px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .bottom-row { grid-template-columns: 1fr; }
+    .header { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .header-right { text-align: left; }
+    .brand-title { font-size: 30px; }
+    .page-wrap { padding: 32px 20px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- ─── HEADER ─── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="brand-eyebrow">OTA Revenue Report · ZUZU Channel Management</div>
+      <h1 class="brand-title">The Royal <em>Shilton</em> Resort</h1>
+    </div>
+    <div class="header-right">
+      <div class="report-label">Reporting Period</div>
+      <div class="report-period">January – March 7, 2026</div>
+      <div class="report-sub">ZUZU Service Fee: 28% + VAT 7% · Generated 26 Mar 2026</div>
+    </div>
+  </header>
+
+  <!-- ─── KPI CARDS ─── -->
+  <div class="section-label">Key Performance Indicators</div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Gross Revenue</div>
+      <div class="kpi-value" style="font-size:28px"><span class="currency">฿</span>553,755.21</div>
+      <div class="kpi-meta">Jan 1 – Mar 7, 2026 · <span class="highlight">165 reservations</span></div>
+      <div class="kpi-badge badge-gold">Total OTA Gross</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">ZUZU Service Fee (28%)</div>
+      <div class="kpi-value" style="font-size:28px"><span class="currency" style="color:var(--red)">฿</span><span style="color:var(--red)">155,051.46</span></div>
+      <div class="kpi-meta">OTA channel management cost</div>
+      <div class="kpi-badge badge-red">28.00% of Gross</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">VAT on ZUZU Fee (7%)</div>
+      <div class="kpi-value" style="font-size:28px"><span class="currency" style="color:var(--amber)">฿</span><span style="color:var(--amber)">10,853.60</span></div>
+      <div class="kpi-meta">Value Added Tax on service fee</div>
+      <div class="kpi-badge" style="background:rgba(212,150,58,0.1);color:#e4b070;border:1px solid rgba(212,150,58,0.3)">7.00% of ZUZU Fee</div>
+    </div>
+    <div class="kpi-card" style="border-color: rgba(92,184,138,0.3);">
+      <div class="kpi-label">Net Revenue (After All Deductions)</div>
+      <div class="kpi-value" style="font-size:28px"><span class="currency" style="color:var(--green)">฿</span><span style="color:var(--green)">387,850.15</span></div>
+      <div class="kpi-meta">Actual hotel net payout</div>
+      <div class="kpi-badge badge-green">70.05% Retention Rate</div>
+    </div>
+  </div>
+
+  <!-- ─── MAIN CHARTS ─── -->
+  <div class="charts-row">
+    <!-- Monthly Revenue Chart -->
+    <div class="chart-card">
+      <div class="chart-title">Monthly Revenue Breakdown</div>
+      <div class="chart-subtitle">Gross vs. ZUZU Fee vs. Net Revenue · Thai Baht (฿)</div>
+      <div class="chart-canvas-wrap" style="height:280px;">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+    <!-- Booking Count -->
+    <div class="chart-card">
+      <div class="chart-title">Bookings by Month</div>
+      <div class="chart-subtitle">Total number of reservations</div>
+      <div class="chart-canvas-wrap" style="height:280px;">
+        <canvas id="bookingsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MONTHLY SUMMARY TABLE ─── -->
+  <div class="section-label">Monthly Financial Summary</div>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Bookings</th>
+          <th>Gross Revenue</th>
+          <th>ZUZU Fee (28%)</th>
+          <th>VAT on Fee (7%)</th>
+          <th>Net Payout</th>
+          <th>Net After VAT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="td-month">January 2026<small>01 Jan – 31 Jan 2026 · 31 days</small></div></td>
+          <td class="td-gross">84</td>
+          <td class="td-gross">฿332,440.96</td>
+          <td class="td-fee">−฿93,083.47</td>
+          <td class="td-vat">−฿6,515.84</td>
+          <td class="td-gross">฿239,357.49</td>
+          <td class="td-net">฿232,841.65</td>
+        </tr>
+        <tr>
+          <td><div class="td-month">February 2026<small>01 Feb – 28 Feb 2026 · 28 days</small></div></td>
+          <td class="td-gross">62</td>
+          <td class="td-gross">฿194,527.54</td>
+          <td class="td-fee">−฿54,467.71</td>
+          <td class="td-vat">−฿3,812.74</td>
+          <td class="td-gross">฿140,059.83</td>
+          <td class="td-net">฿136,247.09</td>
+        </tr>
+        <tr>
+          <td><div class="td-month">March 2026<small>01 Mar – 07 Mar 2026 · 7 days</small></div></td>
+          <td class="td-gross">19</td>
+          <td class="td-gross">฿26,786.71</td>
+          <td class="td-fee">−฿7,500.28</td>
+          <td class="td-vat">−฿525.02</td>
+          <td class="td-gross">฿19,286.43</td>
+          <td class="td-net">฿18,761.41</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td><div class="tfoot-label">Grand Total</div></td>
+          <td class="tfoot-gross">165</td>
+          <td class="tfoot-gross">฿553,755.21</td>
+          <td class="tfoot-fee">−฿155,051.46</td>
+          <td class="tfoot-vat">−฿10,853.60</td>
+          <td class="tfoot-gross">฿398,703.75</td>
+          <td class="tfoot-net">฿387,850.15</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ─── BOTTOM ROW: OTA + ROOM TYPE + CHANNEL PIE ─── -->
+  <div class="section-label">Channel & Room Performance</div>
+  <div class="bottom-row">
+
+    <!-- OTA Channels Combined -->
+    <div class="chart-card" style="animation-delay:0.4s;">
+      <div class="chart-title">OTA Channel Ranking</div>
+      <div class="chart-subtitle">Gross revenue by platform · All period</div>
+      <ul class="ota-list" id="otaList"></ul>
+    </div>
+
+    <!-- Room Type Distribution -->
+    <div class="chart-card" style="animation-delay:0.5s;">
+      <div class="chart-title">Room Type Revenue</div>
+      <div class="chart-subtitle">Gross revenue share by category</div>
+      <div class="chart-canvas-wrap" style="height:220px; margin-bottom:16px;">
+        <canvas id="roomChart"></canvas>
+      </div>
+      <ul class="ota-list" id="roomList"></ul>
+    </div>
+
+    <!-- OTA Donut -->
+    <div class="chart-card" style="animation-delay:0.45s;">
+      <div class="chart-title">Channel Share</div>
+      <div class="chart-subtitle">Gross revenue distribution by OTA</div>
+      <div class="chart-canvas-wrap" style="height:260px;">
+        <canvas id="otaDonut"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── MONTH-BY-MONTH OTA TABLE ─── -->
+  <div class="section-label">OTA Performance by Month</div>
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Jan Bookings</th>
+          <th>Jan Gross (฿)</th>
+          <th>Feb Bookings</th>
+          <th>Feb Gross (฿)</th>
+          <th>Mar 1–7 Bookings</th>
+          <th>Mar 1–7 Gross (฿)</th>
+          <th>Total Gross (฿)</th>
+        </tr>
+      </thead>
+      <tbody id="otaTableBody"></tbody>
+      <tfoot id="otaTableFoot"></tfoot>
+    </table>
+  </div>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer">
+    <div class="footer-brand"><em>The Royal Shilton Resort</em> — Management Report</div>
+    <div class="footer-note">ZUZU Service Fee: 28% of Gross + 7% VAT applied to fee amount</div>
+    <div class="footer-generated">Generated: March 26, 2026<br>Period: Jan 1 – Mar 7, 2026</div>
+  </footer>
+
+</div><!-- end page-wrap -->
+
+<script>
+// ─── DATA ───────────────────────────────────────────
+const data = {
+  months: {
+    jan: {
+      label: 'January', bookings: 84,
+      gross: 332440.96, zuzu: 93083.47, net: 239357.49, vat: 6515.84, netActual: 232841.65,
+      ota: {
+        'Booking.com': { count: 20, gross: 148650.07 },
+        'Agoda':        { count: 39, gross: 99349.51 },
+        'CtripPrepay':  { count: 19, gross: 54260.39 },
+        'ExpediaPrepay':{ count: 3,  gross: 22155.38 },
+        'BEI/Scheduled':{ count: 1,  gross: 4560.00 },
+        'HotelBeds':    { count: 2,  gross: 3465.61 },
+      },
+      room: {
+        'Grand Double Room': { count: 40, gross: 172218.44 },
+        'Lanna Villa':       { count: 25, gross: 121979.01 },
+        'Grand Twin Room':   { count: 19, gross: 38243.51 },
+      }
+    },
+    feb: {
+      label: 'February', bookings: 62,
+      gross: 194527.54, zuzu: 54467.71, net: 140059.83, vat: 3812.74, netActual: 136247.09,
+      ota: {
+        'Agoda':        { count: 37, gross: 103620.80 },
+        'Booking.com':  { count: 10, gross: 32657.84 },
+        'HotelBeds':    { count: 3,  gross: 27250.30 },
+        'Tiket.com':    { count: 10, gross: 20031.76 },
+        'Ctrip':        { count: 1,  gross: 9234.03 },
+        'BEI/Scheduled':{ count: 1,  gross: 1732.81 },
+      },
+      room: {
+        'Grand Double Room': { count: 32, gross: 82539.12 },
+        'Lanna Villa':       { count: 13, gross: 66214.90 },
+        'Grand Twin Room':   { count: 15, gross: 43194.27 },
+        'Other':             { count: 2,  gross: 2579.25 },
+      }
+    },
+    mar: {
+      label: 'Mar 1–7', bookings: 19,
+      gross: 26786.71, zuzu: 7500.28, net: 19286.43, vat: 525.02, netActual: 18761.41,
+      ota: {
+        'Agoda':       { count: 12, gross: 19579.83 },
+        'Tiket.com':   { count: 6,  gross: 4672.14 },
+        'Booking.com': { count: 1,  gross: 2534.74 },
+      },
+      room: {
+        'Grand Double Room': { count: 14, gross: 20351.38 },
+        'Lanna Villa':       { count: 3,  gross: 5161.63 },
+        'Grand Twin Room':   { count: 2,  gross: 1273.70 },
+      }
+    }
+  }
+};
+
+// Combined OTA totals
+const otaCombined = {};
+for (const m of Object.values(data.months)) {
+  for (const [name, d] of Object.entries(m.ota)) {
+    if (!otaCombined[name]) otaCombined[name] = { count: 0, gross: 0 };
+    otaCombined[name].count += d.count;
+    otaCombined[name].gross += d.gross;
+  }
+}
+const otaSorted = Object.entries(otaCombined).sort((a, b) => b[1].gross - a[1].gross);
+const totalGross = 553755.21;
+
+// Combined Room totals
+const roomCombined = {};
+for (const m of Object.values(data.months)) {
+  for (const [name, d] of Object.entries(m.room)) {
+    const key = name === 'Other' ? 'Other/Unknown' : name;
+    if (!roomCombined[key]) roomCombined[key] = { count: 0, gross: 0 };
+    roomCombined[key].count += d.count;
+    roomCombined[key].gross += d.gross;
+  }
+}
+const roomSorted = Object.entries(roomCombined).sort((a, b) => b[1].gross - a[1].gross);
+
+// ─── COLORS ──────────────────────────────────────────
+const palette = ['#c9a84c', '#5b8de0', '#5cb88a', '#9b73d4', '#5bbab4', '#e07a5b', '#d4963a'];
+const otaColors = { 'Agoda': '#e05c5c', 'Booking.com': '#5b8de0', 'CtripPrepay': '#5cb88a',
+  'HotelBeds': '#9b73d4', 'Tiket.com': '#5bbab4', 'ExpediaPrepay': '#d4963a',
+  'Ctrip': '#5cb88a', 'BEI/Scheduled': '#a0a8b4' };
+const roomColors = { 'Grand Double Room': '#c9a84c', 'Lanna Villa': '#5b8de0', 'Grand Twin Room': '#5cb88a', 'Other/Unknown': '#555' };
+
+// ─── CHART.JS DEFAULTS ───────────────────────────────
+Chart.defaults.color = '#7a8090';
+Chart.defaults.font.family = "'Jost', sans-serif";
+Chart.defaults.font.size = 11;
+
+// ─── MONTHLY BAR CHART ───────────────────────────────
+const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+new Chart(monthlyCtx, {
+  type: 'bar',
+  data: {
+    labels: ['January', 'February', 'March 1–7'],
+    datasets: [
+      {
+        label: 'Gross Revenue',
+        data: [332440.96, 194527.54, 26786.71],
+        backgroundColor: 'rgba(201,168,76,0.7)',
+        borderColor: '#c9a84c',
+        borderWidth: 1,
+        borderRadius: 1,
+      },
+      {
+        label: 'Net After Fees',
+        data: [232841.65, 136247.09, 18761.41],
+        backgroundColor: 'rgba(92,184,138,0.6)',
+        borderColor: '#5cb88a',
+        borderWidth: 1,
+        borderRadius: 1,
+      },
+      {
+        label: 'ZUZU Fee + VAT',
+        data: [93083.47 + 6515.84, 54467.71 + 3812.74, 7500.28 + 525.02],
+        backgroundColor: 'rgba(224,92,92,0.45)',
+        borderColor: '#e05c5c',
+        borderWidth: 1,
+        borderRadius: 1,
+      },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, boxWidth: 10, boxHeight: 10 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ฿${ctx.raw.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(35,40,48,0.8)' }, ticks: { color: '#7a8090' } },
+      y: {
+        grid: { color: 'rgba(35,40,48,0.8)' },
+        ticks: {
+          color: '#7a8090',
+          callback: v => '฿' + (v / 1000).toFixed(0) + 'K'
+        }
+      }
+    }
+  }
+});
+
+// ─── BOOKINGS CHART ──────────────────────────────────
+const bookCtx = document.getElementById('bookingsChart').getContext('2d');
+new Chart(bookCtx, {
+  type: 'bar',
+  data: {
+    labels: ['January', 'February', 'March 1–7'],
+    datasets: [{
+      label: 'Bookings',
+      data: [84, 62, 19],
+      backgroundColor: ['rgba(201,168,76,0.65)', 'rgba(91,141,224,0.65)', 'rgba(92,184,138,0.65)'],
+      borderColor: ['#c9a84c', '#5b8de0', '#5cb88a'],
+      borderWidth: 1,
+      borderRadius: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.raw} bookings` } }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(35,40,48,0.8)' }, ticks: { color: '#7a8090' } },
+      y: { grid: { color: 'rgba(35,40,48,0.8)' }, ticks: { color: '#7a8090', stepSize: 20 } }
+    }
+  }
+});
+
+// ─── OTA DONUT ───────────────────────────────────────
+const otaDonutCtx = document.getElementById('otaDonut').getContext('2d');
+new Chart(otaDonutCtx, {
+  type: 'doughnut',
+  data: {
+    labels: otaSorted.map(([n]) => n),
+    datasets: [{
+      data: otaSorted.map(([, d]) => d.gross),
+      backgroundColor: otaSorted.map(([n]) => otaColors[n] || '#888'),
+      borderColor: '#12151a',
+      borderWidth: 3,
+      hoverOffset: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '68%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { padding: 12, boxWidth: 8, boxHeight: 8, color: '#7a8090' }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ฿${ctx.raw.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${(ctx.raw / totalGross * 100).toFixed(1)}%)`
+        }
+      }
+    }
+  }
+});
+
+// ─── ROOM DONUT ──────────────────────────────────────
+const roomCtx = document.getElementById('roomChart').getContext('2d');
+new Chart(roomCtx, {
+  type: 'doughnut',
+  data: {
+    labels: roomSorted.map(([n]) => n),
+    datasets: [{
+      data: roomSorted.map(([, d]) => d.gross),
+      backgroundColor: roomSorted.map(([n]) => roomColors[n] || '#888'),
+      borderColor: '#12151a',
+      borderWidth: 3,
+      hoverOffset: 6,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '65%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.label}: ฿${ctx.raw.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        }
+      }
+    }
+  }
+});
+
+// ─── OTA LIST ────────────────────────────────────────
+const maxOta = otaSorted[0][1].gross;
+const otaListEl = document.getElementById('otaList');
+otaSorted.forEach(([name, d], i) => {
+  const pct = (d.gross / totalGross * 100).toFixed(1);
+  const barPct = (d.gross / maxOta * 100).toFixed(1);
+  const color = otaColors[name] || palette[i % palette.length];
+  otaListEl.innerHTML += `
+    <li class="ota-item">
+      <span class="ota-dot" style="background:${color}"></span>
+      <span class="ota-name">${name}</span>
+      <span class="ota-count">${d.count} bookings</span>
+      <div class="ota-bar-wrap"><div class="ota-bar" style="background:${color}; width:${barPct}%"></div></div>
+      <span class="ota-amount" style="font-size:11px">฿${d.gross.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})} <span style="color:var(--text-dim);font-size:10px">${pct}%</span></span>
+    </li>`;
+});
+
+// ─── ROOM LIST ───────────────────────────────────────
+const maxRoom = roomSorted[0][1].gross;
+const roomListEl = document.getElementById('roomList');
+roomSorted.forEach(([name, d]) => {
+  const pct = (d.gross / totalGross * 100).toFixed(1);
+  const color = roomColors[name] || '#888';
+  roomListEl.innerHTML += `
+    <li class="ota-item">
+      <span class="ota-dot" style="background:${color}"></span>
+      <span class="ota-name">${name}</span>
+      <span class="ota-count">${d.count} res.</span>
+      <span class="ota-amount" style="font-size:11px">฿${d.gross.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2})} <span style="color:var(--text-dim);font-size:10px">${pct}%</span></span>
+    </li>`;
+});
+
+// ─── OTA BY MONTH TABLE ──────────────────────────────
+const fmt = v => '฿' + v.toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
+const allOtas = ['Agoda', 'Booking.com', 'CtripPrepay', 'Ctrip', 'HotelBeds', 'Tiket.com', 'ExpediaPrepay', 'BEI/Scheduled'];
+const tbody = document.getElementById('otaTableBody');
+let totals = { jan: 0, feb: 0, mar: 0, total: 0, janC: 0, febC: 0, marC: 0 };
+
+allOtas.forEach(ota => {
+  const janD = data.months.jan.ota[ota];
+  const febD = data.months.feb.ota[ota];
+  const marD = data.months.mar.ota[ota];
+  const total = (janD?.gross || 0) + (febD?.gross || 0) + (marD?.gross || 0);
+  if (total === 0) return;
+  const color = otaColors[ota] || '#888';
+  totals.jan += janD?.gross || 0;
+  totals.feb += febD?.gross || 0;
+  totals.mar += marD?.gross || 0;
+  totals.total += total;
+  totals.janC += janD?.count || 0;
+  totals.febC += febD?.count || 0;
+  totals.marC += marD?.count || 0;
+  tbody.innerHTML += `<tr>
+    <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:8px"></span>${ota}</td>
+    <td>${janD ? janD.count : '—'}</td>
+    <td class="td-gross">${janD ? fmt(janD.gross) : '—'}</td>
+    <td>${febD ? febD.count : '—'}</td>
+    <td class="td-gross">${febD ? fmt(febD.gross) : '—'}</td>
+    <td>${marD ? marD.count : '—'}</td>
+    <td class="td-gross">${marD ? fmt(marD.gross) : '—'}</td>
+    <td class="td-net">${fmt(total)}</td>
+  </tr>`;
+});
+
+document.getElementById('otaTableFoot').innerHTML = `<tr>
+  <td><div class="tfoot-label">Grand Total</div></td>
+  <td class="tfoot-gross">${totals.janC}</td>
+  <td class="tfoot-gross">${fmt(totals.jan)}</td>
+  <td class="tfoot-gross">${totals.febC}</td>
+  <td class="tfoot-gross">${fmt(totals.feb)}</td>
+  <td class="tfoot-gross">${totals.marC}</td>
+  <td class="tfoot-gross">${fmt(totals.mar)}</td>
+  <td class="tfoot-net">${fmt(totals.total)}</td>
+</tr>`;
+
+// ─── ANIMATE BARS ────────────────────────────────────
+setTimeout(() => {
+  document.querySelectorAll('.ota-bar').forEach(b => {
+    const w = b.style.width;
+    b.style.width = '0';
+    requestAnimationFrame(() => { b.style.width = w; });
+  });
+}, 300);
+</script>
+</body>
+</html>
